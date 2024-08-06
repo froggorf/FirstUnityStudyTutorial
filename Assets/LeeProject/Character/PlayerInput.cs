@@ -15,6 +15,8 @@ public class PlayerInput : MonoBehaviour
     private Rigidbody2D rigid;
     private Animator anim;
 
+    private Vector3 dirVec;
+    private GameObject scanObject;
 
     void Start()
     {
@@ -37,13 +39,17 @@ public class PlayerInput : MonoBehaviour
         bool bHorizontalUp = Input.GetButtonUp("Horizontal");
         bool bVerticalUp = Input.GetButtonUp("Vertical");
 
-        if (bHorizontalDown || bVerticalUp)
+        if (bHorizontalDown)
         {
             bMoveHorizontal = true;
         }
-        else if(bVerticalDown || bHorizontalUp)
+        else if(bVerticalDown)
         {
             bMoveHorizontal = false;
+        }
+        else if (bHorizontalUp || bVerticalUp)
+        {
+            bMoveHorizontal = (h != 0);
         }
 
         if (anim.GetInteger("hAxisRaw") != h)
@@ -60,9 +66,23 @@ public class PlayerInput : MonoBehaviour
         {
             anim.SetBool("bIsChange", false);
         }
-        
-        
-        
+
+        if (bVerticalDown && v == 1)
+        {
+            dirVec = Vector3.up;
+        }
+        else if(bVerticalDown && v==-1)
+        {
+            dirVec = Vector3.down;
+        }
+        else if (bHorizontalDown && h == 1)
+        {
+            dirVec = Vector3.right;
+        }
+        else if (bHorizontalDown && h == -1)
+        {
+            dirVec = Vector3.left;
+        }
     }
 
 
@@ -71,5 +91,18 @@ public class PlayerInput : MonoBehaviour
         Vector2 moveDir = bMoveHorizontal ? new Vector2(h, 0) : new Vector2(0, v);
 
         rigid.velocity = moveDir * speed;
+
+        //RayTracing
+        Debug.DrawRay(rigid.position , dirVec * 2f, new Color(1.0f,0.0f,0.0f),10.0f);
+        RaycastHit2D raycastHit = Physics2D.Raycast(rigid.position, dirVec, 0.75f,LayerMask.GetMask("Object"));
+
+        if (raycastHit)
+        {
+            scanObject = raycastHit.collider.gameObject;
+        }
+        else
+        {
+            scanObject = null;
+        }
     }
 }
